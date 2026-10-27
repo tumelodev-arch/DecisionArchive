@@ -3,6 +3,11 @@ const { test, expect } = require("@playwright/test");
 test("Decision Archive saves a record and exports portable Markdown and JSON", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /Keep the why, not just the what/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Download filtered Markdown/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Download JSON backup/ })).toBeVisible();
+  await expect(page.getByText(/Import JSON backup/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Replace with sample decisions/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Clear all data/ })).toBeVisible();
 
   const title = "E2E decision about explicit errors";
   await page.locator('#decision-form input[name="title"]').fill(title);
