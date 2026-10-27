@@ -76,8 +76,22 @@
     ...r,
     id: id()
   }));
-  function valid(r) {
-    return r && typeof r.id === "string" && typeof r.title === "string" && r.title.trim() && areas.includes(r.area) && statuses.includes(r.status) && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && typeof r.context === "string" && r.context.trim() && typeof r.decision === "string" && r.decision.trim() && Array.isArray(r.tags) && r.tags.every(t => typeof t === "string");
+  function valid(record) {
+    return Boolean(
+      record &&
+      typeof record.id === "string" &&
+      typeof record.title === "string" &&
+      record.title.trim() &&
+      areas.includes(record.area) &&
+      statuses.includes(record.status) &&
+      /^\d{4}-\d{2}-\d{2}$/.test(record.date) &&
+      typeof record.context === "string" &&
+      record.context.trim() &&
+      typeof record.decision === "string" &&
+      record.decision.trim() &&
+      Array.isArray(record.tags) &&
+      record.tags.every((tag) => typeof tag === "string")
+    );
   }
   function save() {
     try {
