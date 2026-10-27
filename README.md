@@ -1,31 +1,39 @@
 # Decision Archive
 
-A local-first Architecture Decision Record (ADR) workspace for documenting context, alternatives, rationale and consequences.
+A local-first Architecture Decision Record workspace for preserving context, alternatives, rationale and consequences.
 
-## Demo
+**Live demo:** https://tumelodev-arch.github.io/DecisionArchive/
 
-**Hosted status:** not deployed yet. Enable GitHub Pages under **Settings → Pages → Build and deployment → Source = GitHub Actions**. After a successful deployment, the app should be available at [https://tumelodev-arch.github.io/DecisionArchive/](https://tumelodev-arch.github.io/DecisionArchive/).
-
-**Run locally:** open `index.html` in a modern browser. The app has no build step or external runtime dependency.
-
-## Features
+## What it does
 
 - Create, edit and delete decision records.
-- Track status: proposed, accepted, superseded or rejected.
-- Record context, rationale, alternatives, consequences, date and tags.
-- Search records and filter by status or engineering area.
-- Export visible records as Markdown suitable for a repository.
-- Back up and restore the complete archive as JSON with basic record validation.
-- Persist the archive in browser local storage.
+- Track proposed, accepted, superseded and rejected decisions.
+- Capture context, rationale, alternatives, consequences, dates and tags.
+- Search and filter by status or engineering area.
+- Export Markdown and back up or restore validated JSON.
 
 ## Run locally
 
-Open `index.html` in a modern browser. There is no build step or external runtime dependency. `styles.css` and `app.js` are loaded locally.
+Open `index.html` in a modern browser. The application uses local HTML, CSS and JavaScript and has no build step or external runtime dependency.
 
 ## Data and privacy
 
-Records are stored in this browser only; they are not sent to a server or shared across browsers. Use synthetic or non-sensitive information. Clearing browser storage can remove locally saved records.
+Records stay in the current browser until exported or cleared. They are not sent to a server or shared across browsers. The archive is local to the current browser. It has no sign-in, shared workspace, cloud sync or access control. Review Markdown before adding it to a public repository. Do not store employer-confidential decisions or sensitive data.
 
-## Boundaries
+## Tests
 
-The archive is local to the current browser; it has no sign-in, shared workspace, synchronization or access control. Markdown export is intended for manual review before adding a record to a public repository. Do not store credentials, customer data or employer-confidential decisions in the demo.
+The repository includes Playwright end-to-end tests. Install dependencies and Chromium before running them.
+
+```bash
+npm install
+npx playwright install chromium
+npm run test:e2e
+```
+
+## Interface design
+
+The interface uses the shared Engineering Field Notes design language, adapted for this app's main task. Primary controls have labelled actions, the mobile layout keeps actions reachable, and keyboard focus is visible. The app uses its own accent colour to make it recognisable beside the portfolio.
+
+## Limitations
+
+This is a browser-based practice application. A successful static deployment does not establish that it has a backend, authentication, shared state or production monitoring.

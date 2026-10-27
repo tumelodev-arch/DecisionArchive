@@ -76,8 +76,22 @@
     ...r,
     id: id()
   }));
-  function valid(r) {
-    return r && typeof r.id === "string" && typeof r.title === "string" && r.title.trim() && areas.includes(r.area) && statuses.includes(r.status) && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && typeof r.context === "string" && r.context.trim() && typeof r.decision === "string" && r.decision.trim() && Array.isArray(r.tags) && r.tags.every(t => typeof t === "string");
+  function valid(record) {
+    return Boolean(
+      record &&
+      typeof record.id === "string" &&
+      typeof record.title === "string" &&
+      record.title.trim() &&
+      areas.includes(record.area) &&
+      statuses.includes(record.status) &&
+      /^\d{4}-\d{2}-\d{2}$/.test(record.date) &&
+      typeof record.context === "string" &&
+      record.context.trim() &&
+      typeof record.decision === "string" &&
+      record.decision.trim() &&
+      Array.isArray(record.tags) &&
+      record.tags.every((tag) => typeof tag === "string")
+    );
   }
   function save() {
     try {
@@ -123,10 +137,49 @@
   }
   function renderList() {
     const rows = filter();
-    $("#visible-count").textContent = rows.length+" record"+(rows.length === 1?"": "s");
-    $("#empty-state").hidden = rows.length>0;
-    $("#decision-list").innerHTML = rows.map(d => '<article class="decision-card status-'+escapeHtml(d.status)+'"><div class="decision-top"><h3>'+escapeHtml(d.title)+'</h3><span class="status-badge '+escapeHtml(d.status)+'">'+escapeHtml(d.status)+'</span></div><div class="decision-meta"><span>'+escapeHtml(d.date)+'</span><span>·</span><span>'+escapeHtml(d.area)+'</span><span>·</span><span>ADR-'+escapeHtml(d.id.slice(0,
-    8).toUpperCase())+'</span></div><p class="decision-context">'+escapeHtml(d.context)+'</p><div class="decision-chosen"><strong>Decision and rationale</strong>'+escapeHtml(d.decision)+'</div>'+((d.alternatives || d.consequences)?'<div class="decision-extras">'+(d.alternatives?'<section><h4>Alternatives considered</h4><p>'+escapeHtml(d.alternatives)+'</p></section>': '')+(d.consequences?'<section><h4>Consequences / follow-up</h4><p>'+escapeHtml(d.consequences)+'</p></section>': '')+'</div>': '')+(d.tags.length?'<div class="tag-list">'+d.tags.map(t => '<span class="tag">'+escapeHtml(t)+'</span>').join("")+'</div>': '')+'<div class="decision-actions"><button data-edit="'+escapeHtml(d.id)+'">Edit record</button><button data-delete="'+escapeHtml(d.id)+'">Delete record</button></div></article>').join("");
+    $("#visible-count").textContent = `${rows.length} record${rows.length === 1 ? "" : "s"}`;
+    $("#empty-state").hidden = rows.length > 0;
+
+    $("#decision-list").innerHTML = rows
+      .map((d) => {
+        const alternatives = d.alternatives
+          ? `<section><h4>Alternatives considered</h4><p>${escapeHtml(d.alternatives)}</p></section>`
+          : "";
+        const consequences = d.consequences
+          ? `<section><h4>Consequences / follow-up</h4><p>${escapeHtml(d.consequences)}</p></section>`
+          : "";
+        const extras = alternatives || consequences
+          ? `<div class="decision-extras">${alternatives}${consequences}</div>`
+          : "";
+        const tags = d.tags.length
+          ? `<div class="tag-list">${d.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>`
+          : "";
+
+        return `
+          <article class="decision-card status-${escapeHtml(d.status)}">
+            <div class="decision-top">
+              <h3>${escapeHtml(d.title)}</h3>
+              <span class="status-badge ${escapeHtml(d.status)}">${escapeHtml(d.status)}</span>
+            </div>
+            <div class="decision-meta">
+              <span>${escapeHtml(d.date)}</span>
+              <span>·</span>
+              <span>${escapeHtml(d.area)}</span>
+              <span>·</span>
+              <span>ADR-${escapeHtml(d.id.slice(0, 8).toUpperCase())}</span>
+            </div>
+            <p class="decision-context">${escapeHtml(d.context)}</p>
+            <div class="decision-chosen"><strong>Decision and rationale</strong>${escapeHtml(d.decision)}</div>
+            ${extras}
+            ${tags}
+            <div class="decision-actions">
+              <button data-edit="${escapeHtml(d.id)}">Edit record</button>
+              <button data-delete="${escapeHtml(d.id)}">Delete record</button>
+            </div>
+          </article>
+        `.trim();
+      })
+      .join("");
   }
   function render() {
     renderMetrics();
@@ -239,7 +292,37 @@
   }
   function visibleMarkdown() {
     const records = filter();
-    return "# Decision Archive export\n\nExported "+new Date().toISOString()+"\n\n"+records.map(d => "## "+d.title+"\n\n- **Status:** "+d.status+"\n- **Area:** "+d.area+"\n- **Date:** "+d.date+"\n- **Tags:** "+(d.tags.join(", ") || "None")+"\n\n### Context\n\n"+d.context+"\n\n### Decision\n\n"+d.decision+"\n\n### Alternatives considered\n\n"+(d.alternatives || "Not recorded")+"\n\n### Consequences and follow-up\n\n"+(d.consequences || "Not recorded")+"\n").join("\n---\n\n");
+    const exportedAt = new Date().toISOString();
+
+    const sections = records.map((d) => `## ${d.title}
+
+- **Status:** ${d.status}
+- **Area:** ${d.area}
+- **Date:** ${d.date}
+- **Tags:** ${d.tags.join(", ") || "None"}
+
+### Context
+
+${d.context}
+
+### Decision
+
+${d.decision}
+
+### Alternatives considered
+
+${d.alternatives || "Not recorded"}
+
+### Consequences and follow-up
+
+${d.consequences || "Not recorded"}
+`);
+
+    return `# Decision Archive export
+
+Exported ${exportedAt}
+
+${sections.join("\n---\n\n")}`;
   }
   $("#export-markdown").addEventListener("click",
   () => download(visibleMarkdown(),
